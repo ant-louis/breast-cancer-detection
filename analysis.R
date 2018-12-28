@@ -33,9 +33,17 @@ str(data)
 
 GLM_complete <- glm(Classification ~ Age + BMI + Glucose + Insulin + HOMA 
                     + Leptin + Adiponectin + Resistin + MCP.1,
+                    data = data,
                     control = list(maxit = 50),
                     family=binomial(logit))
 summary(GLM_complete)
+
+#We do a GLM with only the statistically relevant variables (P value < 0.05)
+GLM_partial <- glm(Classification ~ BMI + Glucose + Resistin,
+                    data = data,
+                    control = list(maxit = 50),
+                    family=binomial(logit))
+summary(GLM_partial)
 
 # --------------------------------------#
 # Comparison of the deviance between ----
