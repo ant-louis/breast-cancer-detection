@@ -31,8 +31,7 @@ str(data)
 
 
 
-GLM_complete <- glm(Classification ~ Age + BMI + Glucose + Insulin + HOMA 
-                    + Leptin + Adiponectin + Resistin + MCP.1,
+GLM_complete <- glm(Classification ~ 
                     data = data,
                     control = list(maxit = 50),
                     family=binomial(logit))
@@ -75,6 +74,38 @@ legend(x="topleft",col=Classification, pch=16, levels(Classification))
 
 # Representation of the residuals wrt to the fitted values
 plot(GLM_complete$fitted, GLM_complete$residuals, col=Classification, pch=16)
+
+
+
+predicted.data <- data.frame(
+  probability.cancer=GLM_complete$fitted.values,
+  class=data$Classification)
+ 
+predicted.data <- predicted.data[
+  order(predicted.data$probability.cancer, decreasing=FALSE),]
+
+predicted.data$rank <- 1:nrow(predicted.data)
+ 
+## Lastly, we can plot the predicted probabilities for each sample having
+## heart disease and color by whether or not they actually had heart disease
+library(ggplot2)
+library(cowplot)
+ggplot(data=predicted.data, aes(x=rank, y=probability.cancer)) +
+  geom_point(aes(color=Classification), alpha=1, shape=4, stroke=2) +
+  xlab("Index") +
+  ylab("Predicted probability of getting breast cancer")
+ 
+ggsave("heart_disease_probabilities.pdf")
+
+
+
+
+
+
+
+
+
+
 
 
 # --------------------------------------#
