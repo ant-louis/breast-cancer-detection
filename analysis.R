@@ -135,16 +135,16 @@ print(CV$cvsd[which.min(CV$lambda.min)])
 #Plotting residuals and others
 library(plotmo) # for plotres
 
-pdf(file="Coefficients",title="")
+pdf(file="Figures/Coefficients",title="")
 plotres(CV$glmnet.fit,which=1)
 dev.off()
-pdf(file="Cumulative_res",title="")
+pdf(file="Figures/Cumulative_res",title="")
 plotres(CV$glmnet.fit,which=2)
 dev.off()
-pdf(file="Residuals",title="")
+pdf(file="Figures/Residuals",title="")
 plotres(CV$glmnet.fit,which=3)
 dev.off()
-pdf(file="QQPlot",title="")
+pdf(file="Figures/QQPlot",title="")
 plotres(CV$glmnet.fit,which=4)
 dev.off()
 
@@ -164,4 +164,4 @@ ggplot(data=pred_data, aes(x=rank, y=proba)) +
   xlab("Index") +
   ylab("Predicted probability of getting breast cancer")
  
-ggsave("pred_vs_class.pdf")
+ggsave("Figures/pred_vs_class.pdf")
