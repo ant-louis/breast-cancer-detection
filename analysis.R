@@ -150,9 +150,9 @@ dev.off()
 
 
 #Predict
-pred = predict(CV$glmnet.fit, as.matrix(features),s=0.001,type="response")
+pred = predict(CV$glmnet.fit, as.matrix(data[,-10]),s=0.001,type="response")
 
-pred_data <- data.frame(proba= pred[,1],class=class)
+pred_data <- data.frame(proba= pred[,1],class=data[,10])
 pred_data <- pred_data[order(pred_data$proba, decreasing=FALSE),]
 pred_data$rank <- 1:nrow(pred_data)
  
@@ -164,4 +164,4 @@ ggplot(data=pred_data, aes(x=rank, y=proba)) +
   xlab("Index") +
   ylab("Predicted probability of getting breast cancer")
  
-ggsave("heart_disease_probabilities_glmnet.pdf")
+ggsave("pred_vs_class.pdf")
