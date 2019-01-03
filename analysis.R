@@ -20,9 +20,12 @@ setwd("/home/tom/Documents/Uliège/HDDA/Breast-cancer-supervised-classification"
 # Data loading
 data <- read.table("data.csv", header=TRUE, sep=',')
 #Correct data types and values
-data$Classification[data$Classification == 1] <- "Healthy"
-data$Classification[data$Classification == 2] <- "Cancerous"
+# data$Classification[data$Classification == 1] <- "Healthy"
+# data$Classification[data$Classification == 2] <- "Cancerous"
+data$Classification[data$Classification == 1] <- "0"
+data$Classification[data$Classification == 2] <- "1"
 data$Classification <-as.factor(data$Classification)
+sapply(data[, 1:9], as.numeric)
 attach(data)
 View(data)
 head(data)
@@ -69,6 +72,7 @@ print(GLM_complete$fitted)
 # Representation of fitted values   ----
 # --------------------------------------#
 # Representation of the fitted values wrt linear predictor
+
 plot(GLM_complete$linear.predictor, GLM_complete$fitted, col=Classification, pch=16)
 legend(x="topleft",col=Classification, pch=16, levels(Classification))
 
@@ -77,6 +81,8 @@ plot(GLM_complete$fitted, GLM_complete$residuals, col=Classification, pch=16)
 
 
 
+## Lastly, we can plot the predicted probabilities for each sample having
+## heart disease and color by whether or not they actually had heart disease
 predicted.data <- data.frame(
   probability.cancer=GLM_complete$fitted.values,
   class=data$Classification)
@@ -86,8 +92,6 @@ predicted.data <- predicted.data[
 
 predicted.data$rank <- 1:nrow(predicted.data)
  
-## Lastly, we can plot the predicted probabilities for each sample having
-## heart disease and color by whether or not they actually had heart disease
 library(ggplot2)
 library(cowplot)
 ggplot(data=predicted.data, aes(x=rank, y=probability.cancer)) +
@@ -96,15 +100,6 @@ ggplot(data=predicted.data, aes(x=rank, y=probability.cancer)) +
   ylab("Predicted probability of getting breast cancer")
  
 ggsave("heart_disease_probabilities.pdf")
-
-
-
-
-
-
-
-
-
 
 
 
@@ -123,5 +118,50 @@ GLM_complete$fitted >= 0.5
 table(GLM_complete$fitted >= 0.5, Classification)
 
 
-# ----------------------------
 
+# Cross validation
+library(glmnet)
+CV = cv.glmnet(x=as.matrix(data[,-10]),
+                y= data[,10],
+                family="binomial",
+                type.measure="class",
+                alpha=1,
+                nlambda=100)
+
+#Mean and std
+print(CV$cvm[which.min(CV$lambda.1se)])
+print(CV$cvsd[which.min(CV$lambda.min)])
+
+#Plotting residuals and others
+library(plotmo) # for plotres
+
+pdf(file="Figures/Coefficients",title="")
+plotres(CV$glmnet.fit,which=1)
+dev.off()
+pdf(file="Figures/Cumulative_res",title="")
+plotres(CV$glmnet.fit,which=2)
+dev.off()
+pdf(file="Figures/Residuals",title="")
+plotres(CV$glmnet.fit,which=3)
+dev.off()
+pdf(file="Figures/QQPlot",title="")
+plotres(CV$glmnet.fit,which=4)
+dev.off()
+
+
+#Predict
+pred = predict(CV$glmnet.fit, as.matrix(data[,-10]),s=0.001,type="response")
+
+pred_data <- data.frame(proba= pred[,1],class=data[,10])
+pred_data <- pred_data[order(pred_data$proba, decreasing=FALSE),]
+pred_data$rank <- 1:nrow(pred_data)
+ 
+library(ggplot2)
+library(cowplot)
+#Plotting prediction vs actual value
+ggplot(data=pred_data, aes(x=rank, y=proba)) +
+  geom_point(aes(color=Classification), alpha=1, shape=4, stroke=2) +
+  xlab("Index") +
+  ylab("Predicted probability of getting breast cancer")
+ 
+ggsave("Figures/pred_vs_class.pdf")
