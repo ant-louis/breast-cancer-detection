@@ -1,0 +1,3 @@
+load(".RData")
+ls()
+Rscript rank.r
