@@ -16,6 +16,7 @@ str(data)
 
 #Create training and testing splits
 library(caTools)
+set.seed(111)
 sample = sample.split(data, SplitRatio = .90)
 train_data = subset(data, sample == TRUE)
 test_data  = subset(data, sample == FALSE)
