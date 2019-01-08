@@ -30,7 +30,7 @@ View(maha_ND_ranks)
 pca <- princomp(data, cor=TRUE)
 
 # Represent data on first principal plane with different ranks
-color_pal <- colorRampPalette(c('yellow','red'))
+color_pal <- colorRampPalette(c('green','red'))
 grad_col <- color_pal(length(unique(maha_ND_ranks)))[as.factor(maha_ND_ranks)]
 plot(pca$scores[,1], pca$scores[,2],
 					main="Quantitative data on first principal plane",
@@ -66,8 +66,8 @@ compute_1D_center_depth <- function(x){
 }
 
 # Take the two most important variables
-var1 <- data$BMI
-var2 <- data$Glucose
+var1 <- data$Insulin
+var2 <- data$Leptin
 
 # Compute the 1D-ranks
 OneD_ranks_var1 <- compute_1D_center_depth(var1)
@@ -77,11 +77,10 @@ OneD_ranks_var2 <- compute_1D_center_depth(var2)
 #*******************QUESTION_3***************************
 # Bagplot
 library(aplpack)
-bag <- bagplot(BMI,Glucose,main = "Bagplot", xlab = "BMI", ylab = "Glucose")
+bag <- bagplot(Insulin,Leptin,main = "Bagplot", xlab = "Insulin", ylab = "Leptin")
 
 # Get the 2D rankings
 TwoD_ranks <- bag$hdepths
-TwoD_ranks
 
 # Measure the discrepancy between the 2D-ranking and the
 # multivariate ranking of Q1 with Spearman rank correlation
@@ -95,3 +94,17 @@ corr_2D_1D_var1 <- cor(TwoD_ranks, OneD_ranks_var1, method='spearman')
 corr_2D_1D_var2 <- cor(TwoD_ranks, OneD_ranks_var2, method='spearman')
 corr_2D_1D_var1
 corr_2D_1D_var2
+
+# Scatter plots
+plot(TwoD_ranks, maha_ND_ranks, main="Scatterplot", 
+     xlab="2D-rankings ", ylab="Multivariate rankings ", pch=16)
+
+plot(TwoD_ranks, OneD_ranks_var1, main="Scatterplot", 
+     xlab="2D-rankings ", ylab="1D-rankings for Insulin", pch=16)
+abline(lm(TwoD_ranks~OneD_ranks_var1), col="red")
+
+plot(TwoD_ranks, OneD_ranks_var2, main="Scatterplot", 
+     xlab="2D-rankings ", ylab="1D-rankings for Leptin", pch=16)
+abline(lm(TwoD_ranks~OneD_ranks_var2), col="red")
+
+
